@@ -114,6 +114,58 @@
             </button>
         </div>
     </form>
+    <hr class="my-5">
+<h4 class="text-center mb-4"><i class="fa-solid fa-list me-2"></i>Atenciones Registradas</h4>
+
+<table class="table table-hover table-bordered">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>Especialidad</th>
+            <th>Actividad</th>
+            <th>Diagnóstico</th>
+            <th>Ingreso</th>
+            <th>Alta</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $sql = "
+            SELECT 
+                a.id, p.nombre AS paciente, m.nombre AS medico,
+                e.nombre AS especialidad, ac.nombre AS actividad,
+                a.diagnostico, a.fecha_ingreso, a.fecha_alta
+            FROM atenciones a
+            JOIN pacientes p ON a.paciente_id = p.id
+            JOIN medicos m ON a.medico_id = m.id
+            JOIN especialidades e ON a.especialidad_id = e.id
+            JOIN actividades ac ON a.actividad_id = ac.id
+            ORDER BY a.fecha_ingreso DESC
+        ";
+
+        $res = $conexion->query($sql);
+        if ($res->num_rows > 0) {
+            while ($row = $res->fetch_assoc()) {
+                echo "<tr>
+                        <td>{$row['id']}</td>
+                        <td>{$row['paciente']}</td>
+                        <td>{$row['medico']}</td>
+                        <td>{$row['especialidad']}</td>
+                        <td>{$row['actividad']}</td>
+                        <td>{$row['diagnostico']}</td>
+                        <td>{$row['fecha_ingreso']}</td>
+                        <td>{$row['fecha_alta']}</td>
+                    </tr>";
+            }
+        } else {
+            echo "<tr><td colspan='8' class='text-center'>No hay atenciones registradas.</td></tr>";
+        }
+        ?>
+    </tbody>
+</table>
+
 </div>
 
 <!-- Validación Bootstrap -->
