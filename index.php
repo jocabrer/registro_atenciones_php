@@ -74,5 +74,15 @@ $atenciones = $conexion->query("
         </tbody>
     </table>
 </div>
+<footer class="bg-dark text-white mt-5 py-4">
+  <div class="container text-center">
+    <p class="mb-1">
+      <strong>TALLER DE APLICACIONES JAVA - 2510 (B2)</strong><br>
+      Instituto Profesional de Chile (IPCHILE)
+    </p>
+    <p class="mb-1">Integrantes: Christian Tacchi y José Cabrera Gatica</p>
+    <p class="mb-0">Profesora: Sabina Romero</p>
+  </div>
+</footer>
 </body>
 </html>
