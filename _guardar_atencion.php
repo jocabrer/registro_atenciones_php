@@ -13,11 +13,12 @@ $sql = "INSERT INTO atenciones (paciente_id, medico_id, especialidad_id, activid
         VALUES ('$paciente_id', '$medico_id', '$especialidad_id', '$actividad_id', '$diagnostico', '$fecha_ingreso', '$fecha_alta')";
 
 if ($conexion->query($sql) === TRUE) {
-    echo "Atención guardada correctamente.";
+    header("Location: index.php?msg=guardado");
+    exit;
 } else {
-    echo "Error: " . $conexion->error;
+    header("Location: index.php?msg=error");
+    exit;
 }
 
 $conexion->close();
 ?>
-<a href='index.php'>Volver</a>

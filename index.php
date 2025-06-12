@@ -1,189 +1,78 @@
-<?php include 'conexion.php'; ?>
+<?php
+include 'conexion.php';
+$atenciones = $conexion->query("
+    SELECT a.id, p.nombre AS paciente, m.nombre AS medico, e.nombre AS especialidad,
+           ac.nombre AS actividad, a.diagnostico, a.fecha_ingreso, a.fecha_alta
+    FROM atenciones a
+    JOIN pacientes p ON a.paciente_id = p.id
+    JOIN medicos m ON a.medico_id = m.id
+    JOIN especialidades e ON a.especialidad_id = e.id
+    JOIN actividades ac ON a.actividad_id = ac.id
+    ORDER BY a.fecha_ingreso DESC
+")->fetch_all(MYSQLI_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Registro de Atenciones</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Bootstrap 5 -->
+    <title>Listado de Atenciones</title>
+        <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Font Awesome para íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <style>
-        body {
-            background-color: #f2f5f9;
-        }
-        .form-container {
-            max-width: 800px;
-            margin: 50px auto;
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        }
-    </style>
 </head>
 <body>
+    <?php if (isset($_GET['msg'])): ?>
+    <div class="alert alert-<?= $_GET['msg'] === 'guardado' ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
+        <?= $_GET['msg'] === 'guardado' || $_GET['msg'] === 'actualizado'  ? 'Atención registrada correctamente.' : 'Ocurrió un error al registrar la atención.' ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+<?php endif; ?>
 
-<div class="form-container">
-    <h2 class="text-center mb-4"><i class="fa-solid fa-notes-medical me-2"></i>Registrar Atención Médica</h2>
-    <form action="guardar_atencion.php" method="POST" class="needs-validation" novalidate>
+<div class="container mt-5">
+    <h2 class="mb-4"><i class="fa-solid fa-list me-2"></i>Listado de Atenciones</h2>
 
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label for="paciente" class="form-label">Paciente:</label>
-                <select name="paciente_id" id="paciente" class="form-select" required>
-                    <option value="">Seleccione un paciente</option>
-                    <?php
-                    $res = $conexion->query("SELECT * FROM pacientes");
-                    while ($row = $res->fetch_assoc()) {
-                        echo "<option value='{$row['id']}'>{$row['nombre']}</option>";
-                    }
-                    ?>
-                </select>
-                <div class="invalid-feedback">Seleccione un paciente.</div>
-            </div>
+    <a href="nueva_atencion.php" class="btn btn-primary mb-3">
+        <i class="fa-solid fa-plus me-2"></i>Nueva Atención
+    </a>
 
-            <div class="col-md-6">
-                <label for="medico" class="form-label">Médico:</label>
-                <select name="medico_id" id="medico" class="form-select" required>
-                    <option value="">Seleccione un médico</option>
-                    <?php
-                    $res = $conexion->query("SELECT * FROM medicos");
-                    while ($row = $res->fetch_assoc()) {
-                        echo "<option value='{$row['id']}'>{$row['nombre']}</option>";
-                    }
-                    ?>
-                </select>
-                <div class="invalid-feedback">Seleccione un médico.</div>
-            </div>
-
-            <div class="col-md-6">
-                <label for="especialidad" class="form-label">Especialidad:</label>
-                <select name="especialidad_id" id="especialidad" class="form-select" required>
-                    <option value="">Seleccione una especialidad</option>
-                    <?php
-                    $res = $conexion->query("SELECT * FROM especialidades");
-                    while ($row = $res->fetch_assoc()) {
-                        echo "<option value='{$row['id']}'>{$row['nombre']}</option>";
-                    }
-                    ?>
-                </select>
-                <div class="invalid-feedback">Seleccione una especialidad.</div>
-            </div>
-
-            <div class="col-md-6">
-                <label for="actividad" class="form-label">Actividad:</label>
-                <select name="actividad_id" id="actividad" class="form-select" required>
-                    <option value="">Seleccione una actividad</option>
-                    <?php
-                    $res = $conexion->query("SELECT * FROM actividades");
-                    while ($row = $res->fetch_assoc()) {
-                        echo "<option value='{$row['id']}'>{$row['nombre']}</option>";
-                    }
-                    ?>
-                </select>
-                <div class="invalid-feedback">Seleccione una actividad.</div>
-            </div>
-
-            <div class="col-12">
-                <label for="diagnostico" class="form-label">Diagnóstico:</label>
-                <input type="text" name="diagnostico" id="diagnostico" class="form-control" required>
-                <div class="invalid-feedback">Ingrese el diagnóstico.</div>
-            </div>
-
-            <div class="col-md-6">
-                <label for="fecha_ingreso" class="form-label">Fecha Ingreso:</label>
-                <input type="date" name="fecha_ingreso" id="fecha_ingreso" class="form-control" required>
-                <div class="invalid-feedback">Ingrese la fecha de ingreso.</div>
-            </div>
-
-            <div class="col-md-6">
-                <label for="fecha_alta" class="form-label">Fecha Alta:</label>
-                <input type="date" name="fecha_alta" id="fecha_alta" class="form-control" required>
-                <div class="invalid-feedback">Ingrese la fecha de alta.</div>
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="fa-solid fa-floppy-disk me-2"></i>Guardar Atención
-            </button>
-        </div>
-    </form>
-    <hr class="my-5">
-<h4 class="text-center mb-4"><i class="fa-solid fa-list me-2"></i>Atenciones Registradas</h4>
-
-<table class="table table-hover table-bordered">
-    <thead class="table-light">
-        <tr>
-            <th>#</th>
-            <th>Paciente</th>
-            <th>Médico</th>
-            <th>Especialidad</th>
-            <th>Actividad</th>
-            <th>Diagnóstico</th>
-            <th>Ingreso</th>
-            <th>Alta</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php
-        $sql = "
-            SELECT 
-                a.id, p.nombre AS paciente, m.nombre AS medico,
-                e.nombre AS especialidad, ac.nombre AS actividad,
-                a.diagnostico, a.fecha_ingreso, a.fecha_alta
-            FROM atenciones a
-            JOIN pacientes p ON a.paciente_id = p.id
-            JOIN medicos m ON a.medico_id = m.id
-            JOIN especialidades e ON a.especialidad_id = e.id
-            JOIN actividades ac ON a.actividad_id = ac.id
-            ORDER BY a.fecha_ingreso DESC
-        ";
-
-        $res = $conexion->query($sql);
-        if ($res->num_rows > 0) {
-            while ($row = $res->fetch_assoc()) {
-                echo "<tr>
-                        <td>{$row['id']}</td>
-                        <td>{$row['paciente']}</td>
-                        <td>{$row['medico']}</td>
-                        <td>{$row['especialidad']}</td>
-                        <td>{$row['actividad']}</td>
-                        <td>{$row['diagnostico']}</td>
-                        <td>{$row['fecha_ingreso']}</td>
-                        <td>{$row['fecha_alta']}</td>
-                    </tr>";
-            }
-        } else {
-            echo "<tr><td colspan='8' class='text-center'>No hay atenciones registradas.</td></tr>";
-        }
-        ?>
-    </tbody>
-</table>
-
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Paciente</th>
+                <th>Médico</th>
+                <th>Especialidad</th>
+                <th>Actividad</th>
+                <th>Diagnóstico</th>
+                <th>Ingreso</th>
+                <th>Alta</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($atenciones as $a): ?>
+                <tr>
+                    <td><?= $a['paciente'] ?></td>
+                    <td><?= $a['medico'] ?></td>
+                    <td><?= $a['especialidad'] ?></td>
+                    <td><?= $a['actividad'] ?></td>
+                    <td><?= $a['diagnostico'] ?></td>
+                    <td><?= $a['fecha_ingreso'] ?></td>
+                    <td><?= $a['fecha_alta'] ?></td>
+                    <td>
+                        <a href="editar_atencion.php?id=<?= $a['id'] ?>" class="btn btn-sm btn-success">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="_eliminar_atencion.php?id=<?= $a['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar esta atención?')">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            <?php endforeach ?>
+        </tbody>
+    </table>
 </div>
-
-<!-- Validación Bootstrap -->
-<script>
-    (() => {
-        'use strict';
-        const forms = document.querySelectorAll('.needs-validation');
-        Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    })();
-</script>
-
 </body>
 </html>
